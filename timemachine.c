@@ -7,11 +7,18 @@
 #include <time.h>
 #include <inttypes.h>
 #include <dlfcn.h>
+#include <stdlib.h>
 
+// function pointers
 static time_t (*time_fn)(time_t*) = 0;
 static int (*gettimeofday_fn)(struct timeval*, struct timezone*) = 0;
 static int (*clock_gettime_fn)(clockid_t, struct timespec*) = 0;
-static char* delta_file = "/tmp/libtime.conf";
+
+// configuration
+#define ENV_CONF_FILE "LIBTIMEMACHINE_CONF"
+static char* default_conf_file = "/tmp/libtimemachine.conf";
+
+// pointers to the libraries
 static void* libc = 0;
 static void* librt = 0;
 
@@ -19,11 +26,22 @@ static void* librt = 0;
 #define LIBC "libc.so.6"
 #define LIBRT "librt.so.1"
 
+static char* get_conf_file()
+{
+    char* ev = getenv(ENV_CONF_FILE);
+    char* conf_file = default_conf_file;
+    if (ev) {
+        conf_file = ev;
+    }
+    return conf_file;
+}
+
 static time_t get_delta()
 {
     time_t delta = 0;
     char buffer[BUFFER_SIZE] = { 0 };
-    int fd = open(delta_file, O_RDONLY);    
+    char* conf_file = get_conf_file();
+    int fd = open(conf_file, O_RDONLY);    
     if (fd != -1) {
         ssize_t nread = read(fd, buffer, (BUFFER_SIZE - 1));
         if (nread > 0) {
