@@ -76,6 +76,9 @@ time_t time(time_t* t)
     if (time_fn) {
         now = (*time_fn)(t);
         now += delta;
+        if (t) {
+            *t = now;
+        }
     }
     return now;
 }
