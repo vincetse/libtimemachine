@@ -16,7 +16,7 @@ static int (*clock_gettime_fn)(clockid_t, struct timespec*) = 0;
 
 // configuration
 #define ENV_CONF_FILE "LIBTIMEMACHINE_CONF"
-static char* default_conf_file = "/tmp/libtimemachine.conf";
+#define DEFAULT_CONF_FILE "/tmp/libtimemachine.conf"
 
 // pointers to the libraries
 static void* libc = 0;
@@ -26,10 +26,13 @@ static void* librt = 0;
 #define LIBC "libc.so.6"
 #define LIBRT "librt.so.1"
 
+////////////////////////////////////////////////////////////////////////////////
+// utils
+////////////////////////////////////////////////////////////////////////////////
 static char* get_conf_file()
 {
     char* ev = getenv(ENV_CONF_FILE);
-    char* conf_file = default_conf_file;
+    char* conf_file = DEFAULT_CONF_FILE;
     if (ev) {
         conf_file = ev;
     }
@@ -52,19 +55,24 @@ static time_t get_delta()
     return delta;
 }
 
+#define setup_func_pointer(lib_ptr, lib_name, func_ptr, func_name) \
+    if (func_ptr == 0) { \
+        if (lib_ptr == 0) { \
+            lib_ptr = dlopen(lib_name, RTLD_LAZY); \
+        } \
+        if (lib_ptr != 0) { \
+            dlerror(); \
+            *(void**)(&func_ptr) = dlsym(lib_ptr, func_name); \
+        } \
+    }
+
+////////////////////////////////////////////////////////////////////////////////
 time_t time(time_t* t)
+////////////////////////////////////////////////////////////////////////////////
 {
     time_t delta = get_delta();
     time_t now = 0;
-    if (time_fn == 0) {
-        if (!libc) {
-            libc = dlopen(LIBC, RTLD_LAZY);
-        }
-        if (libc) {
-            dlerror();
-            *(void**)(&time_fn) = dlsym(libc, "time");
-        }
-    }
+    setup_func_pointer(libc, LIBC, time_fn, "time");
     if (time_fn) {
         now = (*time_fn)(t);
         now += delta;
@@ -72,19 +80,13 @@ time_t time(time_t* t)
     return now;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 int gettimeofday(struct timeval *tv, struct timezone *tz)
+////////////////////////////////////////////////////////////////////////////////
 {
     time_t delta = get_delta();
     int retv = -1;
-    if (gettimeofday_fn == 0) {
-        if (!libc) {
-            libc = dlopen(LIBC, RTLD_LAZY);
-        }
-        if (libc) {
-            dlerror();
-            *(void**)(&gettimeofday_fn) = dlsym(libc, "gettimeofday");
-        }
-    }
+    setup_func_pointer(libc, LIBC, gettimeofday_fn, "gettimeofday");
     if (gettimeofday_fn) {
         retv = (*gettimeofday_fn)(tv, tz);
         if (retv == 0 && tv) {
@@ -94,19 +96,13 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
     return retv;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 int clock_gettime(clockid_t clk_id, struct timespec *tp)
+////////////////////////////////////////////////////////////////////////////////
 {
     time_t delta = get_delta();
     int retv = -1;
-    if (clock_gettime_fn == 0) {
-        if (!librt) {
-            librt = dlopen(LIBRT, RTLD_LAZY);
-        }
-        if (librt) {
-            dlerror();
-            *(void**)(&clock_gettime_fn) = dlsym(librt, "clock_gettime");
-        }
-    }
+    setup_func_pointer(librt, LIBRT, clock_gettime_fn, "clock_gettime");
     if (clock_gettime_fn) {
         retv = (*clock_gettime_fn)(clk_id, tp);
         if (retv == 0 && tp) {
