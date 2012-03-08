@@ -19,6 +19,7 @@ The configuration file contains a signed integer value that is interpreted as th
     $ cat /tmp/libtimemachine.conf
     -86400
 
+
 Usage
 -----
 
@@ -39,17 +40,23 @@ This library can either be linked into an executable or dynamically-loaded with 
 Note the date/time show_time test program with the `LD_PRELOAD` environment variables set reports a time 86400 seconds before what the same `show_time` program reports without the environments variables set?
 
 
+Unit Tests
+----------
+
+The unit tests are written using the [Check](http://check.sourceforge.net/) framework.  Install CUnit if you want to run the unit tests.
+
+
 FAQ
 ---
 
 1. Why does it not work for my program?
 
-This library overrides only the aforementioned time-related functions, so your program using `libtimemachine` need to be using these functions to use this library.  More functions will be supported as they are requested.
+    This library overrides only the aforementioned time-related functions, so your program using `libtimemachine` need to be using these functions to use this library.  More functions will be supported as they are requested.
 
 2. How do I request more functions to be supported?
 
-Submit a patch, or send me a request!
+    Submit a patch, or send me a request!
 
 3. How does it work?
 
-`libtimemachine` simply overrides the supported functions from their native libraries with its own versions of the functions so that it has an opportunity to do some arithmetic on the values returned by the real functions.  The real functions are called by address after their addresses are determined by looking up the symbol table.
+    `libtimemachine` simply overrides the supported functions from their native libraries with its own versions of the functions so that it has an opportunity to do some arithmetic on the values returned by the real functions.  The real functions are called by address after their addresses are determined by looking up the symbol table.
