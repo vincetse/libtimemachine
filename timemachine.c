@@ -67,20 +67,39 @@ static time_t get_delta()
     }
 
 ////////////////////////////////////////////////////////////////////////////////
-time_t time(time_t* t)
+time_t timemachine_time(time_t* t)
 ////////////////////////////////////////////////////////////////////////////////
 {
-    time_t delta = get_delta();
     time_t now = 0;
     setup_func_pointer(libc, LIBC, time_fn, "time");
     if (time_fn) {
         now = (*time_fn)(t);
-        now += delta;
-        if (t) {
-            *t = now;
-        }
     }
     return now;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+time_t time(time_t* t)
+////////////////////////////////////////////////////////////////////////////////
+{
+    time_t delta = get_delta();
+    time_t now = timemachine_time(t) + delta;
+    if (t) {
+        (*t) = now;
+    }
+    return now;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+int timemachine_gettimeofday(struct timeval *tv, struct timezone *tz)
+////////////////////////////////////////////////////////////////////////////////
+{
+    int retv = -1;
+    setup_func_pointer(libc, LIBC, gettimeofday_fn, "gettimeofday");
+    if (gettimeofday_fn) {
+        retv = (*gettimeofday_fn)(tv, tz);
+    }
+    return retv;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -88,13 +107,21 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
 ////////////////////////////////////////////////////////////////////////////////
 {
     time_t delta = get_delta();
+    int retv = timemachine_gettimeofday(tv, tz);
+    if (retv == 0 && tv) {
+        tv->tv_sec += delta;
+    }
+    return retv;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+int timemachine_clock_gettime(clockid_t clk_id, struct timespec *tp)
+////////////////////////////////////////////////////////////////////////////////
+{
     int retv = -1;
-    setup_func_pointer(libc, LIBC, gettimeofday_fn, "gettimeofday");
-    if (gettimeofday_fn) {
-        retv = (*gettimeofday_fn)(tv, tz);
-        if (retv == 0 && tv) {
-            tv->tv_sec += delta;
-        }
+    setup_func_pointer(librt, LIBRT, clock_gettime_fn, "clock_gettime");
+    if (clock_gettime_fn) {
+        retv = (*clock_gettime_fn)(clk_id, tp);
     }
     return retv;
 }
@@ -104,13 +131,9 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
 ////////////////////////////////////////////////////////////////////////////////
 {
     time_t delta = get_delta();
-    int retv = -1;
-    setup_func_pointer(librt, LIBRT, clock_gettime_fn, "clock_gettime");
-    if (clock_gettime_fn) {
-        retv = (*clock_gettime_fn)(clk_id, tp);
-        if (retv == 0 && tp) {
-            tp->tv_sec += delta;
-        }
+    int retv = timemachine_clock_gettime(clk_id, tp);
+    if (retv == 0 && tp) {
+        tp->tv_sec += delta;
     }
     return retv;
 }
