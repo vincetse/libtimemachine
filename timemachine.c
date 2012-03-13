@@ -41,18 +41,18 @@ static char* get_conf_file()
 
 static time_t get_delta()
 {
-    time_t delta = 0;
+    int delta = 0;
     char buffer[BUFFER_SIZE] = { 0 };
     char* conf_file = get_conf_file();
     int fd = open(conf_file, O_RDONLY);    
     if (fd != -1) {
         ssize_t nread = read(fd, buffer, (BUFFER_SIZE - 1));
         if (nread > 0) {
-            sscanf(buffer, "%"SCNi64, &delta);
+            sscanf(buffer, "%d", &delta);
         }
         close(fd);
     }
-    return delta;
+    return (time_t)delta;
 }
 
 #define setup_func_pointer(lib_ptr, lib_name, func_ptr, func_name) \
