@@ -4,8 +4,8 @@
 #include <time.h>
 #include <sys/time.h>
 #include <limits.h>
-#include <check.h>
 #include "timemachine.h"
+#include "minunit.h"
 
 #define CONF_FILE "test_timemachine.conf"
 #define ENV_CONF_FILE "LIBTIMEMACHINE_CONF"
@@ -30,33 +30,33 @@ void cleanup()
     unlink(CONF_FILE);
 }
 
-START_TEST (test_time)
+static char* test_time()
 {
     {
         time_t a = 1;
         time_t b = 100;
-        fail_unless(time(0) == timemachine_time(0));
-        fail_unless(time(&a) == timemachine_time(&b));
-        fail_unless(a == b);
+        mu_assert_int_equals(time(0), timemachine_time(0));
+        mu_assert_int_equals(time(&a), timemachine_time(&b));
+        mu_assert_int_equals(a, b);
     }
     {
         int delta = 0;
-        fail_unless(set_delta(delta) == 0);
+        mu_assert_int_equals(set_delta(delta), 0);
         time_t a = 1;
         time_t b = 100;
-        fail_unless(time(0) == timemachine_time(0) + delta);
-        fail_unless(time(&a) == timemachine_time(&b) + delta);
-        fail_unless(a == b + delta);
+        mu_assert_int_equals(time(0), timemachine_time(0) + delta);
+        mu_assert_int_equals(time(&a), timemachine_time(&b) + delta);
+        mu_assert_int_equals(a, b + delta);
         cleanup();
     }
     {
         int delta = -1;
-        fail_unless(set_delta(delta) == 0);
+        mu_assert_int_equals(set_delta(delta), 0);
         time_t a = 1;
         time_t b = 100;
-        fail_unless(time(0) == timemachine_time(0) + delta);
-        fail_unless(time(&a) == timemachine_time(&b) + delta);
-        fail_unless(a == b + delta);
+        mu_assert_int_equals(time(0), timemachine_time(0) + delta);
+        mu_assert_int_equals(time(&a), timemachine_time(&b) + delta);
+        mu_assert_int_equals(a, b + delta);
         cleanup();
     }
     {
@@ -64,19 +64,19 @@ START_TEST (test_time)
         set_delta(delta);
         time_t a = 1;
         time_t b = 100;
-        fail_unless(time(0) == timemachine_time(0) + delta);
-        fail_unless(time(&a) == timemachine_time(&b) + delta);
-        fail_unless(a == b + delta);
+        mu_assert_int_equals(time(0), timemachine_time(0) + delta);
+        mu_assert_int_equals(time(&a), timemachine_time(&b) + delta);
+        mu_assert_int_equals(a, b + delta);
         cleanup();
     }
     {
         int delta = 1;
-        fail_unless(set_delta(delta) == 0);
+        mu_assert_int_equals(set_delta(delta), 0);
         time_t a = 1;
         time_t b = 100;
-        fail_unless(time(0) == timemachine_time(0) + delta);
-        fail_unless(time(&a) == timemachine_time(&b) + delta);
-        fail_unless(a == b + delta);
+        mu_assert_int_equals(time(0), timemachine_time(0) + delta);
+        mu_assert_int_equals(time(&a), timemachine_time(&b) + delta);
+        mu_assert_int_equals(a, b + delta);
         cleanup();
     }
     {
@@ -84,40 +84,41 @@ START_TEST (test_time)
         set_delta(delta);
         time_t a = 1;
         time_t b = 100;
-        fail_unless(time(0) == timemachine_time(0) + delta);
-        fail_unless(time(&a) == timemachine_time(&b) + delta);
-        fail_unless(a == b + delta);
+        mu_assert_int_equals(time(0), timemachine_time(0) + delta);
+        mu_assert_int_equals(time(&a), timemachine_time(&b) + delta);
+        mu_assert_int_equals(a, b + delta);
         cleanup();
     }
+
+    return 0;
 }
-END_TEST
 
 #define _timeval(x) \
     struct timeval x; x.tv_sec = x.tv_usec = 0;
 
-START_TEST (test_gettimeofday)
+static char* test_gettimeofday()
 {
     {
         _timeval(a);
         _timeval(b);
-        fail_unless(a.tv_sec == 0);
-        fail_unless(b.tv_sec == 0);
-        fail_unless(gettimeofday(&a, 0) == 0);
-        fail_unless(timemachine_gettimeofday(&b, 0) == 0);
-        fail_unless(a.tv_sec == b.tv_sec);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(a.tv_sec, 0);
+        mu_assert_int_equals(b.tv_sec, 0);
+        mu_assert_int_equals(gettimeofday(&a, 0), 0);
+        mu_assert_int_equals(timemachine_gettimeofday(&b, 0), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
     }
     {
         _timeval(a);
         _timeval(b);
         time_t delta = 0;
         set_delta(delta);
-        fail_unless(gettimeofday(&a, 0) == 0);
-        fail_unless(timemachine_gettimeofday(&b, 0) == 0);
-        fail_unless(a.tv_sec == b.tv_sec);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(gettimeofday(&a, 0), 0);
+        mu_assert_int_equals(timemachine_gettimeofday(&b, 0), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
     {
@@ -125,11 +126,11 @@ START_TEST (test_gettimeofday)
         _timeval(b);
         time_t delta = -1;
         set_delta(delta);
-        fail_unless(gettimeofday(&a, 0) == 0);
-        fail_unless(timemachine_gettimeofday(&b, 0) == 0);
-        fail_unless(a.tv_sec == b.tv_sec + delta);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(gettimeofday(&a, 0), 0);
+        mu_assert_int_equals(timemachine_gettimeofday(&b, 0), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec + delta);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
     {
@@ -137,11 +138,11 @@ START_TEST (test_gettimeofday)
         _timeval(b);
         time_t delta = INT_MIN;
         set_delta(delta);
-        fail_unless(gettimeofday(&a, 0) == 0);
-        fail_unless(timemachine_gettimeofday(&b, 0) == 0);
-        fail_unless(a.tv_sec == b.tv_sec + delta);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(gettimeofday(&a, 0), 0);
+        mu_assert_int_equals(timemachine_gettimeofday(&b, 0), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec + delta);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
     {
@@ -149,11 +150,11 @@ START_TEST (test_gettimeofday)
         _timeval(b);
         time_t delta = 1;
         set_delta(delta);
-        fail_unless(gettimeofday(&a, 0) == 0);
-        fail_unless(timemachine_gettimeofday(&b, 0) == 0);
-        fail_unless(a.tv_sec == b.tv_sec + delta);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(gettimeofday(&a, 0), 0);
+        mu_assert_int_equals(timemachine_gettimeofday(&b, 0), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec + delta);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
     {
@@ -161,44 +162,45 @@ START_TEST (test_gettimeofday)
         _timeval(b);
         time_t delta = INT_MAX;
         set_delta(delta);
-        fail_unless(gettimeofday(&a, 0) == 0);
-        fail_unless(timemachine_gettimeofday(&b, 0) == 0);
-        fail_unless(a.tv_sec == b.tv_sec + delta);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(gettimeofday(&a, 0), 0);
+        mu_assert_int_equals(timemachine_gettimeofday(&b, 0), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec + delta);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
+
+    return 0;
 }
-END_TEST
 
 #define _timespec(x) \
     struct timespec x; x.tv_sec = x.tv_nsec = 0;
 
-START_TEST (test_clock_gettime)
+static char* test_clock_gettime()
 {
     {
         _timespec(a);
         _timespec(b);
-        fail_unless(a.tv_sec == 0);
-        fail_unless(b.tv_sec == 0);
-        fail_unless(clock_gettime(CLOCK_REALTIME, &a) == 0);
-        fail_unless(timemachine_clock_gettime(CLOCK_REALTIME, &b) == 0);
-        fail_unless(a.tv_sec == b.tv_sec);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(a.tv_sec, 0);
+        mu_assert_int_equals(b.tv_sec, 0);
+        mu_assert_int_equals(clock_gettime(CLOCK_REALTIME, &a), 0);
+        mu_assert_int_equals(timemachine_clock_gettime(CLOCK_REALTIME, &b), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
     }
     {
         _timespec(a);
         _timespec(b);
         time_t delta = 0;
         set_delta(delta);
-        fail_unless(a.tv_sec == 0);
-        fail_unless(b.tv_sec == 0);
-        fail_unless(clock_gettime(CLOCK_REALTIME, &a) == 0);
-        fail_unless(timemachine_clock_gettime(CLOCK_REALTIME, &b) == 0);
-        fail_unless(a.tv_sec == b.tv_sec);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(a.tv_sec, 0);
+        mu_assert_int_equals(b.tv_sec, 0);
+        mu_assert_int_equals(clock_gettime(CLOCK_REALTIME, &a), 0);
+        mu_assert_int_equals(timemachine_clock_gettime(CLOCK_REALTIME, &b), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
     {
@@ -206,13 +208,13 @@ START_TEST (test_clock_gettime)
         _timespec(b);
         time_t delta = -1;
         set_delta(delta);
-        fail_unless(a.tv_sec == 0);
-        fail_unless(b.tv_sec == 0);
-        fail_unless(clock_gettime(CLOCK_REALTIME, &a) == 0);
-        fail_unless(timemachine_clock_gettime(CLOCK_REALTIME, &b) == 0);
-        fail_unless(a.tv_sec == b.tv_sec + delta);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(a.tv_sec, 0);
+        mu_assert_int_equals(b.tv_sec, 0);
+        mu_assert_int_equals(clock_gettime(CLOCK_REALTIME, &a), 0);
+        mu_assert_int_equals(timemachine_clock_gettime(CLOCK_REALTIME, &b), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec + delta);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
     {
@@ -220,13 +222,13 @@ START_TEST (test_clock_gettime)
         _timespec(b);
         time_t delta = INT_MIN;
         set_delta(delta);
-        fail_unless(a.tv_sec == 0);
-        fail_unless(b.tv_sec == 0);
-        fail_unless(clock_gettime(CLOCK_REALTIME, &a) == 0);
-        fail_unless(timemachine_clock_gettime(CLOCK_REALTIME, &b) == 0);
-        fail_unless(a.tv_sec == b.tv_sec + delta);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(a.tv_sec, 0);
+        mu_assert_int_equals(b.tv_sec, 0);
+        mu_assert_int_equals(clock_gettime(CLOCK_REALTIME, &a), 0);
+        mu_assert_int_equals(timemachine_clock_gettime(CLOCK_REALTIME, &b), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec + delta);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
     {
@@ -234,13 +236,13 @@ START_TEST (test_clock_gettime)
         _timespec(b);
         time_t delta = 1;
         set_delta(delta);
-        fail_unless(a.tv_sec == 0);
-        fail_unless(b.tv_sec == 0);
-        fail_unless(clock_gettime(CLOCK_REALTIME, &a) == 0);
-        fail_unless(timemachine_clock_gettime(CLOCK_REALTIME, &b) == 0);
-        fail_unless(a.tv_sec == b.tv_sec + delta);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(a.tv_sec, 0);
+        mu_assert_int_equals(b.tv_sec, 0);
+        mu_assert_int_equals(clock_gettime(CLOCK_REALTIME, &a), 0);
+        mu_assert_int_equals(timemachine_clock_gettime(CLOCK_REALTIME, &b), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec + delta);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
     {
@@ -248,36 +250,25 @@ START_TEST (test_clock_gettime)
         _timespec(b);
         time_t delta = INT_MAX;
         set_delta(delta);
-        fail_unless(a.tv_sec == 0);
-        fail_unless(b.tv_sec == 0);
-        fail_unless(clock_gettime(CLOCK_REALTIME, &a) == 0);
-        fail_unless(timemachine_clock_gettime(CLOCK_REALTIME, &b) == 0);
-        fail_unless(a.tv_sec == b.tv_sec + delta);
-        fail_if(a.tv_sec == 0);
-        fail_if(b.tv_sec == 0);
+        mu_assert_int_equals(a.tv_sec, 0);
+        mu_assert_int_equals(b.tv_sec, 0);
+        mu_assert_int_equals(clock_gettime(CLOCK_REALTIME, &a), 0);
+        mu_assert_int_equals(timemachine_clock_gettime(CLOCK_REALTIME, &b), 0);
+        mu_assert_int_equals(a.tv_sec, b.tv_sec + delta);
+        mu_assert(a.tv_sec != 0);
+        mu_assert(b.tv_sec != 0);
         cleanup();
     }
-}
-END_TEST
 
-Suite* test_suite(void)
-{
-    Suite* s = suite_create("libtimemachine");
-    TCase* tc_core = tcase_create("core");
-    tcase_add_test(tc_core, test_time);
-    tcase_add_test(tc_core, test_gettimeofday);
-    tcase_add_test(tc_core, test_clock_gettime);
-    suite_add_tcase(s, tc_core);
-    return s;
+    return 0;
 }
 
-int main(void)
+static char* all_tests()
 {
-    int nfailed = 0;
-    Suite* s = test_suite();
-    SRunner* sr = srunner_create(s);
-    srunner_run_all(sr, CK_NORMAL);
-    nfailed = srunner_ntests_failed (sr);
-    srunner_free(sr);
-    return (nfailed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    mu_run_test(test_time);
+    mu_run_test(test_gettimeofday);
+    mu_run_test(test_clock_gettime);
+    return 0;
 }
+
+UNITTESTS

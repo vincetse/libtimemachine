@@ -1,0 +1,5 @@
+*.so
+*.o
+*~
+show_time
+test_timemachine

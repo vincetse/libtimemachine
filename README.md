@@ -43,8 +43,13 @@ Note the date/time show_time test program with the `LD_PRELOAD` environment vari
 Unit Tests
 ----------
 
-The unit tests are written using the [Check](http://check.sourceforge.net/) framework.  Install CUnit if you want to run the unit tests.
+The unit tests are written using the "minunit" framework as described in:
+http://www.jera.com/techinfo/jtns/jtn002.html
 
+and then using the slightly enhanced version:
+http://stringencoders.googlecode.com/svn/trunk/test/minunit.h
+
+The tests are run compiled and run automatically.
 
 FAQ
 ---
