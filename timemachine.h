@@ -11,7 +11,9 @@ time_t timemachine_time(time_t* t);
 // \brief alias to the real gettimeofday function
 int timemachine_gettimeofday(struct timeval *tv, struct timezone *tz);
 
+#ifndef __APPLE__
 // \brief alias to the real clock_gettime function
 int timemachine_clock_gettime(clockid_t clk_id, struct timespec *tp);
+#endif
 
 #endif // __TIMEMACHINE_H__

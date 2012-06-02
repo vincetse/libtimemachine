@@ -11,9 +11,11 @@ int main(int argc, char** argv)
     gettimeofday(&tv, 0);
     printf("gettimeofday: %s", ctime(&tv.tv_sec));
 
+#ifndef __APPLE__
     struct timespec ts = {0, 0};
     clock_gettime(CLOCK_REALTIME, &ts);
     printf("clock_gettime: %s", ctime(&ts.tv_sec));
+#endif
 
     return 0;
 }

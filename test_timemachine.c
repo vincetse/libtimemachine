@@ -173,6 +173,7 @@ static char* test_gettimeofday()
     return 0;
 }
 
+#ifndef __APPLE__
 #define _timespec(x) \
     struct timespec x; x.tv_sec = x.tv_nsec = 0;
 
@@ -262,12 +263,15 @@ static char* test_clock_gettime()
 
     return 0;
 }
+#endif
 
 static char* all_tests()
 {
     mu_run_test(test_time);
     mu_run_test(test_gettimeofday);
+#ifndef __APPLE__
     mu_run_test(test_clock_gettime);
+#endif
     return 0;
 }
 
