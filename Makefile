@@ -41,7 +41,7 @@ check:  test_timemachine
 
 clean:
 	rm -f timemachine.o libtimemachine.$(SONAME) show_time test_timemachine
-	rm -f *~
+	rm -f *~ *.pyc
 	rm -rf *.dSYM
 
 help:
