@@ -1,5 +1,17 @@
+# linux objects
 *.so
 *.o
+
+# apple objects
+*.dylib
+*.dSYM
+
+# python objects
+*.pyc
+
+# emacs turns
 *~
+
+# binaries
 show_time
 test_timemachine
