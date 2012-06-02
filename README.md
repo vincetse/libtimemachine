@@ -60,8 +60,8 @@ Usage Mac OS X
 --------------
 
 libtimemachine has only been tested on Mac OS X 10.7.4.  It works
-similarly to linx except it requires two different environment
-vairables to be set to work correctly.
+similarly to linux except it requires two different environment
+variables to be set:
 
     DYLD_FORCE_FLAT_NAMESPACE=1  \
         DYLD_INSERT_LIBRARIES=${pwd}/libtimemachine.dylib ./show_time
